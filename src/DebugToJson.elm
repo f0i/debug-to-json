@@ -92,7 +92,19 @@ encode thing =
             kvs |> List.map (\( k, v ) -> ( k, encode v )) |> E.object
 
         Dct kvs ->
-            kvs |> List.map (\( k, v ) -> ( E.encode 0 (encode k), encode v )) |> E.object
+            kvs
+                |> List.map
+                    (\( k, v ) ->
+                        ( case k of
+                            Str s ->
+                                s
+
+                            _ ->
+                                E.encode 0 (encode k)
+                        , encode v
+                        )
+                    )
+                |> E.object
 
         Str s ->
             E.string s

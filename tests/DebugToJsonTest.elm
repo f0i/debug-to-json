@@ -83,6 +83,6 @@ suite =
                     Dict.fromList [ ( "a", 1 ), ( "b", 2 ) ]
                         |> Debug.toString
                         |> DebugToJson.pp
-                        |> Expect.equal "{\n    \"\\\"a\\\"\": 1,\n    \"\\\"b\\\"\": 2\n}"
+                        |> Expect.equal "{\n    \"a\": 1,\n    \"b\": 2\n}"
             ]
         ]
