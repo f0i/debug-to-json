@@ -52,5 +52,11 @@ suite =
                         |> Debug.toString
                         |> DebugToJson.pp
                         |> Expect.equal "-12.34"
+            , test "negative int" <|
+                \_ ->
+                    -12
+                        |> Debug.toString
+                        |> DebugToJson.pp
+                        |> Expect.equal "-12"
             ]
         ]
