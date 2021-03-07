@@ -31,6 +31,7 @@ import Parser
         , end
         , float
         , getChompedString
+        , int
         , keyword
         , lazy
         , loop
@@ -52,7 +53,8 @@ type Thing
     | Custom String (List Thing)
     | Lst (List Thing)
     | Tpl (List Thing)
-    | Num String -- TODO: store as int and float?
+    | NumInt Int -- TODO: store as int and float?
+    | NumFloat Float -- TODO: store as int and float?
     | Fun
 
 
@@ -110,8 +112,11 @@ encode thing =
         Tpl vals ->
             E.list encode vals
 
-        Num s ->
-            E.string s
+        NumInt n ->
+            E.int n
+
+        NumFloat n ->
+            E.float n
 
         Fun ->
             E.string "<function>"
@@ -137,7 +142,8 @@ parseThing =
             , parseLst
             , parseTpl
             , parseCustom
-            , parseNumber
+            , parseNumberFloat
+            , parseNumberInt
             , parseFun
             ]
         |. spaces
@@ -189,13 +195,24 @@ parseTpl =
         |. spaces
 
 
-parseNumber =
-    succeed Num
-        |= variable
-            { start = \c -> Char.isDigit c || c == '-'
-            , inner = \c -> Char.isHexDigit c || c == 'x' || c == '.'
-            , reserved = Set.empty
-            }
+parseNumberFloat =
+    succeed NumFloat
+        |= oneOf
+            [ succeed negate
+                |. symbol "-"
+                |= float
+            , float
+            ]
+
+
+parseNumberInt =
+    succeed NumInt
+        |= oneOf
+            [ succeed negate
+                |. symbol "-"
+                |= int
+            , int
+            ]
 
 
 parseFun =

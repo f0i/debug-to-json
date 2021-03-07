@@ -13,13 +13,13 @@ elm install f0i/debug-to-json
 ```elm
 import DebugToJson
 
-formated =
+formatted =
     { asdf = "qwer" }
         |> Debug.toString
         |> DebugToJson.ppp
 ```
 
-`formated` will now contain the following String:
+`formatted` will now contain the following String:
 
 ```
 {
