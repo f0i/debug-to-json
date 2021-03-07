@@ -1,6 +1,7 @@
 module DebugToJsonTest exposing (..)
 
 import DebugToJson
+import Dict exposing (Dict)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Test exposing (..)
@@ -9,6 +10,7 @@ import Test exposing (..)
 type MyType
     = MyFirst String Int
     | MySecond
+    | DThird
 
 
 suite : Test
@@ -40,6 +42,12 @@ suite =
                         |> Debug.toString
                         |> DebugToJson.pp
                         |> Expect.equal "{\n    \"MySecond\": []\n}"
+            , test "custom type 3" <|
+                \_ ->
+                    DThird
+                        |> Debug.toString
+                        |> DebugToJson.pp
+                        |> Expect.equal "{\n    \"DThird\": []\n}"
             , test "float" <|
                 \_ ->
                     12.34
@@ -58,5 +66,23 @@ suite =
                         |> Debug.toString
                         |> DebugToJson.pp
                         |> Expect.equal "-12"
+            , test "empty dict" <|
+                \_ ->
+                    Dict.fromList []
+                        |> Debug.toString
+                        |> DebugToJson.pp
+                        |> Expect.equal "{}"
+            , test "dict1" <|
+                \_ ->
+                    Dict.fromList [ ( "a", 1 ) ]
+                        |> Debug.toString
+                        |> DebugToJson.pp
+                        |> Expect.equal "{\n    \"\\\"a\\\"\": 1\n}"
+            , test "dict2" <|
+                \_ ->
+                    Dict.fromList [ ( "a", 1 ), ( "b", 2 ) ]
+                        |> Debug.toString
+                        |> DebugToJson.pp
+                        |> Expect.equal "{\n    \"\\\"a\\\"\": 1,\n    \"\\\"b\\\"\": 2\n}"
             ]
         ]

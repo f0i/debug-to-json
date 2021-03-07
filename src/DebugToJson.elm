@@ -18,7 +18,6 @@ module DebugToJson exposing
 -}
 
 import Json.Encode as E
-import Json.Print
 import Parser
     exposing
         ( (|.)
@@ -49,6 +48,7 @@ import String exposing (words)
 
 type Thing
     = Obj (List ( String, Thing ))
+    | Dct (List ( Thing, Thing ))
     | Str String
     | Custom String (List Thing)
     | Lst (List Thing)
@@ -68,15 +68,10 @@ pp d =
     in
     case v of
         Ok val ->
-            case Json.Print.prettyValue { indent = 4, columns = 120 } (encode val) of
-                Ok s ->
-                    s
-
-                Err s ->
-                    s
+            E.encode 4 (encode val)
 
         Err _ ->
-            "ERR"
+            d
 
 
 
@@ -95,6 +90,9 @@ encode thing =
     case thing of
         Obj kvs ->
             kvs |> List.map (\( k, v ) -> ( k, encode v )) |> E.object
+
+        Dct kvs ->
+            kvs |> List.map (\( k, v ) -> ( E.encode 0 (encode k), encode v )) |> E.object
 
         Str s ->
             E.string s
@@ -137,7 +135,8 @@ parseThing : Parser Thing
 parseThing =
     succeed identity
         |= oneOf
-            [ parseObj
+            [ parseDct
+            , parseObj
             , parseString
             , parseLst
             , parseTpl
@@ -160,6 +159,18 @@ parseObj =
         |= list parseKeyValue
         |. spaces
         |. symbol "}"
+        |. spaces
+
+
+parseDct : Parser Thing
+parseDct =
+    succeed Dct
+        |. spaces
+        |. symbol "Dict.fromList ["
+        |. spaces
+        |= list parseDictKeyValue
+        |. spaces
+        |. symbol "]"
         |. spaces
 
 
@@ -252,6 +263,22 @@ parseKeyValue =
         |. symbol "="
         |. spaces
         |= lazy (\_ -> parseThing)
+        |. spaces
+        |. oneOf [ symbol ",", symbol "" ]
+        |. spaces
+
+
+parseDictKeyValue : Parser ( Thing, Thing )
+parseDictKeyValue =
+    succeed Tuple.pair
+        |. spaces
+        |. symbol "("
+        |. spaces
+        |= lazy (\_ -> parseThing)
+        |. spaces
+        |= lazy (\_ -> parseThing)
+        |. spaces
+        |. symbol ")"
         |. spaces
         |. oneOf [ symbol ",", symbol "" ]
         |. spaces
