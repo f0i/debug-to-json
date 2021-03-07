@@ -14,12 +14,12 @@ suite =
             [ test "()" <|
                 \_ ->
                     "()"
-                        |> DebugToJson.ppp
+                        |> DebugToJson.pp
                         |> Expect.equal "[]"
             , test "hex" <|
                 \_ ->
                     "{asdf = \"qwer\"}"
-                        |> DebugToJson.ppp
+                        |> DebugToJson.pp
                         |> Expect.equal "{\n    \"asdf\": \"qwer\"\n}"
             ]
         ]

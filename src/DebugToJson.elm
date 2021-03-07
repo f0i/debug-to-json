@@ -1,4 +1,21 @@
-module DebugToJson exposing (..)
+module DebugToJson exposing
+    ( pp
+    , toJson
+    )
+
+{-| Convert Debug.toString output to JSON
+
+
+# Pretty print
+
+@docs pp
+
+
+# Convert to JSON
+
+@docs toJson
+
+-}
 
 import Json.Encode as E
 import Json.Print
@@ -29,16 +46,6 @@ import Set
 import String exposing (words)
 
 
-debugToJsonString : String -> String
-debugToJsonString val =
-    val
-        |> ppp
-
-
-
---|> (++) (val ++ "\n\n")
-
-
 type Thing
     = Obj (List ( String, Thing ))
     | Str String
@@ -49,8 +56,36 @@ type Thing
     | Fun
 
 
+{-| Pretty print output from Debug.toString to JSON
+-}
+pp : String -> String
+pp d =
+    let
+        v =
+            d |> run parse
+    in
+    case v of
+        Ok val ->
+            case Json.Print.prettyValue { indent = 4, columns = 120 } (encode val) of
+                Ok s ->
+                    s
+
+                Err s ->
+                    s
+
+        Err _ ->
+            "ERR"
+
+
 
 -- JSON
+
+
+{-| Convert output from Debug.toString to JSON
+-}
+toJson : String -> Result (List Parser.DeadEnd) E.Value
+toJson val =
+    val |> run parse |> Result.map encode
 
 
 encode : Thing -> E.Value
@@ -82,39 +117,12 @@ encode thing =
             E.string "<function>"
 
 
-ppp d =
-    let
-        v =
-            d |> run parseDebug
-    in
-    case v of
-        Ok val ->
-            case Json.Print.prettyValue { indent = 4, columns = 120 } (encode val) of
-                Ok s ->
-                    s
-
-                Err s ->
-                    s
-
-        Err _ ->
-            "ERR"
-
-
-pp val =
-    case Json.Print.prettyString { indent = 2, columns = 120 } val of
-        Ok s ->
-            s
-
-        Err s ->
-            s
-
-
 
 -- PARSER
 
 
-parseDebug : Parser Thing
-parseDebug =
+parse : Parser Thing
+parse =
     succeed identity
         |= parseThing
         |. end
