@@ -41,13 +41,13 @@ suite =
                     MySecond
                         |> Debug.toString
                         |> DebugToJson.pp
-                        |> Expect.equal "{\n    \"MySecond\": []\n}"
+                        |> Expect.equal "\"MySecond\""
             , test "custom type 3" <|
                 \_ ->
                     DThird
                         |> Debug.toString
                         |> DebugToJson.pp
-                        |> Expect.equal "{\n    \"DThird\": []\n}"
+                        |> Expect.equal "\"DThird\""
             , test "float" <|
                 \_ ->
                     12.34
@@ -77,7 +77,7 @@ suite =
                     Dict.fromList [ ( "a", 1 ) ]
                         |> Debug.toString
                         |> DebugToJson.pp
-                        |> Expect.equal "{\n    \"\\\"a\\\"\": 1\n}"
+                        |> Expect.equal "{\n    \"a\": 1\n}"
             , test "dict2" <|
                 \_ ->
                     Dict.fromList [ ( "a", 1 ), ( "b", 2 ) ]

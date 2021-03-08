@@ -24,14 +24,11 @@ import Parser
         , (|=)
         , Parser
         , Step(..)
-        , andThen
-        , backtrackable
         , chompIf
         , end
         , float
         , getChompedString
         , int
-        , keyword
         , lazy
         , loop
         , map
@@ -43,7 +40,6 @@ import Parser
         , variable
         )
 import Set
-import String exposing (words)
 
 
 type Thing
@@ -108,6 +104,9 @@ encode thing =
 
         Str s ->
             E.string s
+
+        Custom name [] ->
+            E.string name
 
         Custom name args ->
             E.object
@@ -305,10 +304,29 @@ notQuote =
 
 escapedChar : Parser String
 escapedChar =
-    getChompedString <|
-        succeed ()
-            |. chompIf (\c -> c == '\\')
-            |. chompIf (\c -> True)
+    succeed
+        (\c ->
+            case c of
+                "t" ->
+                    "\t"
+
+                "n" ->
+                    "\n"
+
+                "\"" ->
+                    "\""
+
+                "\\" ->
+                    "\\"
+
+                _ ->
+                    "\\" ++ c
+        )
+        |= getChompedString
+            (succeed ()
+                |. symbol "\\"
+                |. chompIf (\_ -> True)
+            )
 
 
 repeat : Parser String -> Parser String
