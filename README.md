@@ -16,7 +16,7 @@ import DebugToJson
 formatted =
     { asdf = "qwer" }
         |> Debug.toString
-        |> DebugToJson.ppp
+        |> DebugToJson.pp
 ```
 
 `formatted` will now contain the following String:

@@ -1,9 +1,11 @@
 module DebugToJsonTest exposing (..)
 
+import Array exposing (Array)
 import DebugToJson
 import Dict exposing (Dict)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
+import Set exposing (Set)
 import Test exposing (..)
 
 
@@ -84,5 +86,17 @@ suite =
                         |> Debug.toString
                         |> DebugToJson.pp
                         |> Expect.equal "{\n    \"a\": 1,\n    \"b\": 2\n}"
+            , test "Set" <|
+                \_ ->
+                    Set.fromList [ 1, 3, 2 ]
+                        |> Debug.toString
+                        |> DebugToJson.pp
+                        |> Expect.equal "[\n    1,\n    2,\n    3\n]"
+            , test "Array" <|
+                \_ ->
+                    Array.fromList [ 1, 3, 2 ]
+                        |> Debug.toString
+                        |> DebugToJson.pp
+                        |> Expect.equal "[\n    1,\n    3,\n    2\n]"
             ]
         ]

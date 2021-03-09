@@ -45,6 +45,8 @@ import Set
 type Thing
     = Obj (List ( String, Thing ))
     | Dct (List ( Thing, Thing ))
+    | Arr (List Thing)
+    | Set (List Thing)
     | Str String
     | Custom String (List Thing)
     | Lst (List Thing)
@@ -102,6 +104,12 @@ encode thing =
                     )
                 |> E.object
 
+        Arr vals ->
+            E.list encode vals
+
+        Set vals ->
+            E.list encode vals
+
         Str s ->
             E.string s
 
@@ -147,6 +155,8 @@ parseThing =
     succeed identity
         |= oneOf
             [ parseDct
+            , parseArr
+            , parseSet
             , parseObj
             , parseString
             , parseLst
@@ -180,6 +190,30 @@ parseDct =
         |. symbol "Dict.fromList ["
         |. spaces
         |= list parseDictKeyValue
+        |. spaces
+        |. symbol "]"
+        |. spaces
+
+
+parseArr : Parser Thing
+parseArr =
+    succeed Arr
+        |. spaces
+        |. symbol "Array.fromList ["
+        |. spaces
+        |= lazy (\_ -> list parseThing)
+        |. spaces
+        |. symbol "]"
+        |. spaces
+
+
+parseSet : Parser Thing
+parseSet =
+    succeed Set
+        |. spaces
+        |. symbol "Set.fromList ["
+        |. spaces
+        |= lazy (\_ -> list parseThing)
         |. spaces
         |. symbol "]"
         |. spaces
