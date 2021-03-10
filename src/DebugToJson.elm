@@ -51,9 +51,10 @@ type Thing
     | Custom String (List Thing)
     | Lst (List Thing)
     | Tpl (List Thing)
-    | NumInt Int -- TODO: store as int and float?
-    | NumFloat Float -- TODO: store as int and float?
+    | NumInt Int
+    | NumFloat Float
     | Fun
+    | Intern
 
 
 {-| Pretty print output from Debug.toString to JSON
@@ -138,6 +139,9 @@ encode thing =
         Fun ->
             E.string "<function>"
 
+        Intern ->
+            E.string "<internals>"
+
 
 
 -- PARSER
@@ -165,6 +169,7 @@ parseThing =
             , parseNumberFloat
             , parseNumberInt
             , parseFun
+            , parseIntern
             ]
         |. spaces
         |. oneOf [ symbol ",", symbol "" ]
@@ -274,6 +279,11 @@ parseNumberInt =
 parseFun =
     succeed Fun
         |. symbol "<function>"
+
+
+parseIntern =
+    succeed Intern
+        |. symbol "<internals>"
 
 
 upperVar =
